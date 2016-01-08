@@ -1,0 +1,37 @@
+package guiTEMP;
+
+import gui.GUI;
+import db.DBCreation;
+
+
+
+public class TempMain {
+
+	
+	
+
+	///////////////////////////////////////////
+	///////////////////////////////////////////
+	///////////////////////////////////////////
+	///////////////////////////////////////////
+	///////////////////////////////////////////
+	/// GIA DIAGRAFI AYTO TO ARXEIO
+	
+	public static void main(String[] args) {
+
+		System.out.println("Starting main()...\n");
+		
+		DBCreation.createAdderDB();
+
+
+		GUI window = new GUI();
+		Thread guiThread = new Thread(window);
+		guiThread.start();
+
+
+		
+		System.out.println("\nEnding main()...");
+	}
+
+	
+}

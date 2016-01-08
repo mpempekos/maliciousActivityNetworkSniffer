@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:weightSum="10"
+    android:orientation="vertical"
+    android:baselineAligned="false"
+    >
+
+<RelativeLayout 
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentTop="true"
+    android:layout_weight="10"
+    >
+<ListView
+    android:id="@+id/statistics_list"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentLeft="true"
+    android:layout_alignParentTop="true"
+    android:background="#fff3f3f3"
+    android:cacheColorHint="@android:color/transparent"
+    android:divider="#33b5e5"
+    android:dividerHeight="1dp"
+    android:paddingLeft="2dp"
+    android:paddingRight="2dp" >
+</ListView>
+</RelativeLayout>
+
+<RelativeLayout 
+    	android:background="#aaa"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_alignParentBottom="true"
+        android:layout_weight="0">
+    	 <View
+            android:layout_width="match_parent"
+            android:layout_height="1dip"
+            android:layout_marginLeft="4dip"
+            android:layout_marginRight="4dip"
+            android:background="?android:attr/dividerVertical"
+            android:layout_alignParentTop="true"/>
+        <View
+            android:id="@+id/ViewColorPickerHelper"
+            android:layout_width="1dip"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="4dip"
+            android:layout_marginTop="4dip"
+            android:background="?android:attr/dividerVertical" 
+            android:layout_centerHorizontal="true"/>
+     <LinearLayout 
+         android:layout_width="match_parent"
+         android:layout_height="match_parent"
+         android:weightSum="2"> 
+	<Button
+	    android:layout_weight="1"
+	    android:id="@+id/settings"
+	    android:text="@string/settings"
+	    android:background="?android:attr/selectableItemBackground"
+	    android:layout_width="0dp"
+	    android:layout_height="wrap_content"
+	  	android:textColor="#fff3f3f3"
+	  	android:shadowRadius="1"
+	  	android:textAllCaps="false"
+	/>
+		<Button
+	    android:layout_weight="1"
+	    android:id="@+id/show_button"
+	    android:background="?android:attr/selectableItemBackground"
+	    android:layout_width="0dp"
+	    android:layout_height="wrap_content"
+	  	android:shadowRadius="1"
+	    android:textAllCaps="false"
+	   android:textColor="#fff3f3f3"/>
+	</LinearLayout>
+</RelativeLayout>
+
+</LinearLayout>

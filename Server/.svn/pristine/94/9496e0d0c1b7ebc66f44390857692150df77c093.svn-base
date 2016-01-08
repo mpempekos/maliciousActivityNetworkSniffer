@@ -1,0 +1,153 @@
+package db;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+
+
+public class DBCreation {
+	
+	private static DBCreation instance = null ;
+    private String url; 				////*******Singl_pattern***********/////
+    private String driver; 		
+    private String userName; 	 
+    private String password; 	
+    private String dbName; 		
+    
+    public DBCreation() {								///////private!!!!
+    	this.url = "jdbc:mysql://localhost:3306/";
+    	this.driver = "com.mysql.jdbc.Driver";
+    	this.userName = "root";
+    	this.password = "1234";
+    	this.dbName = "adderDB";
+    }
+    
+    public static synchronized DBCreation getInstance() {
+		if(instance == null)
+			instance = new DBCreation();
+		return instance;
+	}
+	
+    //////////////////////////////////////////////
+    /// Returns a connection with mysql //////////
+    public Connection connectWithMysql() {
+    	Connection conn;
+    	try {
+    		Class.forName(driver).newInstance();
+    		conn = DriverManager.getConnection(url, userName, password);
+    	}
+    	catch (Exception e){
+    		System.out.println("***Cannot connect with mysql");
+    		//e.printStackTrace();
+    		conn=null;
+    	}
+    	return conn;
+    }
+    
+    ///////////////////////////////////////////////////////
+    /// Returns a connection with adderDB ///
+    public Connection connect() {
+    	Connection conn;
+    	try {
+    		Class.forName(driver).newInstance();
+    		conn = DriverManager.getConnection(url+dbName, userName, password);
+    	}
+    	catch (Exception e){
+    		System.out.println("***Cannot connect with database");
+    		//e.printStackTrace();
+    		conn=null;
+    	}
+    	return conn;
+    }
+ 
+
+    public static void createAdderDB() {
+    	DBCreation sql = DBCreation.getInstance();
+        Connection conn;
+    	PreparedStatement st;
+    	conn = sql.connectWithMysql();
+
+    	//////////////////////////////////////////
+    	/// Creating database ////////////////////
+    	System.out.println("Checking adderDB database");
+    	try {
+       		st = conn.prepareStatement("CREATE DATABASE IF NOT EXISTS adderDB");
+    		st.executeUpdate();	
+    	}
+    	catch (SQLException e) {
+    		System.out.println("Error while creating database adderDB");
+    		return;
+    	}
+    	
+
+    	finally {
+    		try { 
+    			conn.close(); 
+    		}
+    		catch (SQLException e) { 
+        		System.out.println("***Cannot close connection with db");
+
+    			e.printStackTrace(); 
+    		}    		
+    	}
+    	/////////////////////////////////////
+    	/// time to create adderDB tables ///
+    	DBCreation.createAdderTables();
+    	
+    }
+    
+    
+    
+    public static void createAdderTables() {
+    	DBCreation sql = DBCreation.getInstance();
+        Connection conn;
+    	PreparedStatement st;
+    	conn = sql.connect();
+
+    	//////////////////////////////////////////
+    	/// Creating Tables ////////////////////
+    	try {
+    		System.out.println("Checking 'clients' table");				//// maybe arraylist instead of table???? /////														
+    		st = conn.prepareStatement("CREATE TABLE IF NOT EXISTS clients (clientID VARCHAR(30) NOT NULL PRIMARY KEY, type ENUM('PC/Laptop', 'Android') NOT NULL,maliciousPatternTimestamp LONG)");	//,statisticalReportTimestamp LONG)");
+    		st.executeUpdate();
+    		st.clearParameters();
+    		
+    		System.out.println("Checking 'statistics' table");		/// timestamp gia statistics???  mpaaa...mallon extra mnhmh--table me th teleutaia eikona tou client-->tote thelei k primarykey!!!!///				//// changed . . . .  /////
+//    		st = conn.prepareStatement("CREATE TABLE IF NOT EXISTS statistics (nodeID VARCHAR(30), interfaceName VARCHAR(20), interfaceIP VARCHAR(20), maliciousPattern VARCHAR(30), frequency INT)");
+    		st = conn.prepareStatement("CREATE TABLE IF NOT EXISTS statistics (nodeID VARCHAR(30), interfaceName VARCHAR(20), interfaceIP VARCHAR(20), maliciousPattern VARCHAR(30), frequency INT, FOREIGN KEY(nodeID) REFERENCES clients(clientID))");
+    		st.executeUpdate();
+    		st.clearParameters();
+    		
+    		System.out.println("Checking 'maliciousPatterns' table");									//// VARCHAR(16) ////////    AUTO_INCREM.
+    		st = conn.prepareStatement("CREATE TABLE IF NOT EXISTS maliciousPatterns (patternID INT NOT NULL AUTO_INCREMENT,maliciousStringPattern VARCHAR(30),maliciousIP VARCHAR(30), time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ,PRIMARY KEY (patternID))");	//// ,mpsmTimestamp LONG, 
+    		st.executeUpdate();
+    		st.clearParameters();
+    		
+    		
+    	
+
+    	}
+    	catch (SQLException e) {
+    		System.out.println("Error while creating tables!");
+    	}
+    	finally {    		
+    		try { 
+    			conn.close(); 
+    		}
+    		catch (SQLException se) { 
+        		System.out.println("***Cannot close connection with db");
+
+    			se.printStackTrace(); 
+    		}
+    	}
+    	
+    }
+    
+        
+    
+}
+
+
+

@@ -1,0 +1,43 @@
+package exchangableObjects;
+
+public class StatisticsEntry {
+	private String interfaceName;
+	private String interfaceIP;	
+	private String maliciousPattern;
+	private int frequency;
+	StatisticsEntry (String interfaceName,String interfaceIP) {
+		this.interfaceName = interfaceName;
+		this.interfaceIP = interfaceIP;
+		this.frequency = 1;
+	}
+	public String getInterfaceName()
+	{
+		return interfaceName;
+	}
+	public String getMaliciousPattern() 
+	{
+		return maliciousPattern;
+	}
+	public void setMaliciousPattern(String maliciousPattern) 
+	{
+		this.maliciousPattern = maliciousPattern;
+	}
+	public String getInterfaceIp()
+	{
+		return interfaceIP;
+	}
+	public void setFrequency()
+	{
+		this.frequency++;
+	}
+	public int getFrequency()
+	{
+		return this.frequency;
+	}
+	public String toString() 
+	{
+		return "interfaceName = " + this.interfaceName + ", interfaceIp = " + this.interfaceIP + "," + "maliciousPattern=" +this.maliciousPattern
+				+ " , frequency = " + this.frequency ;
+	}
+}
+

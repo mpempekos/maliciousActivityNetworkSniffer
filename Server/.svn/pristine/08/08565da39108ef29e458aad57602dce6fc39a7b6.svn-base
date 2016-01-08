@@ -1,0 +1,101 @@
+package server;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Properties;
+
+import javax.xml.ws.Endpoint;
+
+public class Publish {
+	private Publish(){}
+	public static void publishAdder() 
+	{
+		String ipAddress = null;
+		String portNumber = null;
+		String implemantationName = null;
+		File propertiesFile = new File("netConfig.properties");
+		if(!propertiesFile.exists()) {
+			try {
+				propertiesFile.createNewFile();
+				FileWriter buffer = new FileWriter("netConfig.properties");
+				portNumber = "9999";
+				buffer.write("PORT=" + portNumber + "\n");
+				ipAddress = getIpAddress();
+				buffer.write("IP=" + ipAddress + "\n");
+				implemantationName = "Adder";
+				buffer.write("IMPLEMANTATION=" + implemantationName + "\n");
+				buffer.close();
+			
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		}
+		else {
+			Properties properties = new Properties();
+			try {
+				properties.load(new FileInputStream(propertiesFile));
+				portNumber = properties.getProperty("PORT");
+				ipAddress = properties.getProperty("IP");
+				if(!ipAddress.equals(getIpAddress())) {
+					System.out.println("HERE !!!!!!!!!!");
+					OutputStream output = new FileOutputStream("netConfig.properties");
+					properties.setProperty("IP",getIpAddress());
+					properties.store(output,null);
+					ipAddress = properties.getProperty("IP");
+					System.out.println(ipAddress);
+				}
+				implemantationName = properties.getProperty("IMPLEMANTATION");
+			} catch (FileNotFoundException e1) {
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}	
+		}
+		String fullURL = "http://" + ipAddress + ":" + portNumber + "/" + implemantationName;
+		Endpoint endpoint = Endpoint.publish(fullURL,new AdderWebServicesImpl());
+		if(endpoint.isPublished())
+			System.out.println("Server up and running");
+		else {
+			System.err.println("Problem detected publishing server");
+			System.exit(1);
+		}
+	}
+	
+	/*************************************************/
+	/*************************************************/
+	/***********NOT READY YET ? ? ?*******************/
+	/*************************************************/
+	/*************************************************/
+	private static String getIpAddress() 
+	{
+		String result = null;
+		Enumeration<NetworkInterface> netIfs = null;
+		try {
+			netIfs = NetworkInterface.getNetworkInterfaces();
+		} catch (SocketException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		for(NetworkInterface netIf :  Collections.list(netIfs)) {
+			Enumeration<InetAddress> addresses = netIf.getInetAddresses();  
+			while(addresses.hasMoreElements() && (result == null || result.isEmpty())) {  
+                InetAddress address = addresses.nextElement();  
+                if(!address.isLoopbackAddress() && address.isSiteLocalAddress()) {  
+                    result = address.getHostAddress();
+                    return result;
+                }
+			}
+		}
+		return result;
+	}
+}
+

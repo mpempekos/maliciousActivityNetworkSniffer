@@ -1,0 +1,48 @@
+package gui;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+
+import db.DBConnector;
+
+public class StatisticsSearchListener implements ActionListener {
+
+	
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		int i;
+
+		/// getting user selected choices
+		String category = new String(StatisticsPanel.dropDown.getSelectedItem().toString());
+		String filter = new String(StatisticsPanel.searchField.getText());
+		ArrayList< ArrayList<String> > statistics = DBConnector.getStatistics(category, filter);
+
+		StatisticsPanel.tableModel.setRowCount(0);//reset table to ZERO rows
+		
+		for (i=0; i<statistics.size(); i++) {
+			ArrayList <String> statisticRow = statistics.get(i);
+			
+			Object[] tableRow = {
+					statisticRow.get(0), //nodeID
+					statisticRow.get(1), //interfaceName
+					statisticRow.get(2), //interfaceIP
+					statisticRow.get(3), //maliciousPattern
+					statisticRow.get(4), //frequency
+					
+				};
+			StatisticsPanel.tableModel.addRow(tableRow);			
+		}
+
+		// read/update terminal panel
+		String newReport = new String(StatisticsPanel.textArea.getText() + ReportTerminalOperations.getReport());
+
+		// updating both statistics/action terminal with same message
+		StatisticsPanel.textArea.setText(newReport);
+		ActionPanel.textArea.setText(newReport);
+		
+	}
+	
+}
+
+

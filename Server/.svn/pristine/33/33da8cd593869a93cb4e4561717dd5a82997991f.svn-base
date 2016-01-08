@@ -1,0 +1,36 @@
+package guiTEMP;
+
+import java.util.ArrayList;
+
+public class GuiDbConnector{
+
+	
+	
+
+	///////////////////////////////////////////
+	///////////////////////////////////////////
+	///////////////////////////////////////////
+	///////////////////////////////////////////
+	///////////////////////////////////////////
+	/// GIA DIAGRAFI AYTO TO ARXEIO
+	
+	public static ArrayList<String> getRegisteredNodes() {
+		ArrayList<String> registeredNodes = new ArrayList<String>();
+		
+		registeredNodes.add("787472");
+		registeredNodes.add("126472");
+		registeredNodes.add("123987");
+		registeredNodes.add("101135");
+//		registeredNodes.add("555");
+//		registeredNodes.add("666");
+//		registeredNodes.add("777");
+//		registeredNodes.add("888");
+		
+		
+		return registeredNodes;
+	}
+	
+	
+	
+
+}

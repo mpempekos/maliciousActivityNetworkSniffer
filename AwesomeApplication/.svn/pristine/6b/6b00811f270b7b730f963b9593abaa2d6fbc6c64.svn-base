@@ -1,0 +1,20 @@
+package awesomeapp;
+
+import com.example.awesomeapp.R;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.widget.TextView;
+
+public class FirstTabActivity extends Activity {
+
+	private TextView message1;
+	
+	
+	protected void onCreate(Bundle savedInstanceState) {
+	      super.onCreate(savedInstanceState);
+	      setContentView(R.layout.first_tab_activity);
+	      message1 = (TextView)findViewById(R.id.textView1);
+}
+	
+}

@@ -1,0 +1,49 @@
+package dbObjects;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+
+@XmlAccessorType(XmlAccessType.FIELD)
+public class StatisticsEntry {
+	private String interfaceName;
+	private String interfaceIP;	
+	private String maliciousPattern;
+	private int frequency;
+	public StatisticsEntry() {}
+	StatisticsEntry (String interfaceName,String interfaceIP,String maliciousPattern,int frequency) {
+		this.interfaceName = interfaceName;
+		this.interfaceIP = interfaceIP;
+		this.maliciousPattern = maliciousPattern;
+		this.frequency = frequency;
+	}
+	public String getInterfaceName()
+	{
+		return interfaceName;
+	}
+	public String getMaliciousPattern() 
+	{
+		return maliciousPattern;
+	}
+	public void setMaliciousPattern(String maliciousPattern) 
+	{
+		this.maliciousPattern = maliciousPattern;
+	}
+	public String getInterfaceIp()
+	{
+		return interfaceIP;
+	}
+	public void setFrequency()
+	{
+		this.frequency++;
+	}
+	public int getFrequency()
+	{
+		return this.frequency;
+	}
+	public String toString() 
+	{
+		return "interfaceName = " + this.interfaceName + ", interfaceIp = " + this.interfaceIP + "," + "maliciousPattern=" +this.maliciousPattern
+				+ " , frequency = " + this.frequency ;
+	}
+}
+

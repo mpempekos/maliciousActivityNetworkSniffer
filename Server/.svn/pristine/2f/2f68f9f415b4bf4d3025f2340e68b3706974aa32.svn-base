@@ -1,0 +1,46 @@
+package guiDbConnector;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
+import db.DBCreation;
+
+public class GuiDbConnector{
+
+	
+	
+
+	///////////////////////////////////////////
+	///////////////////////////////////////////
+	///////////////////////////////////////////
+	///////////////////////////////////////////
+	///////////////////////////////////////////
+	/// GIA DIAGRAFI H APO KATO
+	
+	public static ArrayList<String> getRegisteredNodes() {
+		ArrayList<String> registeredNodes = new ArrayList<String>();
+		
+		registeredNodes.add("787472");
+		registeredNodes.add("126472");
+		registeredNodes.add("123987");
+		registeredNodes.add("101135");
+//		registeredNodes.add("555");
+//		registeredNodes.add("666");
+//		registeredNodes.add("777");
+//		registeredNodes.add("888");
+		
+		
+		return registeredNodes;
+	}
+	
+	
+	
+
+}
+
+
+
+

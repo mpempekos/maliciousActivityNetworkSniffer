@@ -1,0 +1,43 @@
+package guiDbConnector;
+
+import java.util.ArrayList;
+
+import gui.GUI;
+import db.DBConnector;
+import db.DBCreation;
+
+
+
+public class TempMain {
+
+	
+
+	public static void main(String[] args) {
+
+		System.out.println("Starting main()...\n");
+		
+		DBCreation.createAdderDB();
+
+/*
+		ArrayList< ArrayList<String> > statistics = DBConnector.getStatistics("(all)", "wlan0");
+		
+		
+		System.out.println(statistics.size());
+		for (int i=0; i<statistics.size(); i++) {
+			System.out.println(statistics.get(i));
+			
+		}
+*/		
+		
+
+		GUI window = new GUI();
+		Thread guiThread = new Thread(window);
+		guiThread.start();
+
+
+		
+		System.out.println("\nEnding main()...");
+	}
+
+	
+}

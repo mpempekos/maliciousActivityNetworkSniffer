@@ -1,0 +1,28 @@
+package db;
+import java.sql.Timestamp;
+
+public class NodeIdentifier {
+	private String nodeID;
+	private Timestamp registrationTime;
+	public NodeIdentifier(){}
+	public NodeIdentifier(String nodeID)
+	{
+		this.nodeID = nodeID;
+		this.registrationTime = null;
+	}
+	public String getNodeID() {
+		return nodeID;
+	}
+	public void setNodeID(String nodeID) {
+		this.nodeID = nodeID;
+	}
+	public Timestamp getRegistrationTime() {
+		return registrationTime;
+	}
+	public void setRegistrationTime(Timestamp registrationTime) {
+		this.registrationTime = registrationTime;
+	}
+	public boolean equals(NodeIdentifier ni){
+		return this.nodeID.equals(ni.getNodeID());
+	}
+}

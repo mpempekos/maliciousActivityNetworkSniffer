@@ -1,0 +1,15 @@
+package exchangableObjects;
+
+import java.util.List;
+
+
+public class AvailableNodes {
+
+	private static List<String> nodeList;
+
+
+	public List<String> getNodes() {
+		return nodeList;
+	}
+
+}

@@ -1,0 +1,45 @@
+package nodes;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+public class OnlineNodes {
+	private static OnlineNodes instance = null;
+	// MAP INSTEAD OF LIST FOR EASIER USABILITY
+	private static List<NodeIdentifier> listOnlineNodes = new ArrayList<NodeIdentifier>();
+	private OnlineNodes()
+	{
+		listOnlineNodes = Collections.synchronizedList(listOnlineNodes);
+	}
+	public static synchronized OnlineNodes getInstance() 
+	{
+		if(instance == null)
+			instance = new OnlineNodes();
+		return instance;
+	}
+	public static synchronized boolean addNode(NodeIdentifier ui)
+	{
+		for(NodeIdentifier temp : listOnlineNodes) {
+			if(temp.getNodeID().equals(ui.getNodeID()))
+				return false;
+		}
+		boolean flag = listOnlineNodes.add(ui); 
+		printOnineUsers();
+		return flag;
+	}
+	public static synchronized boolean removeNode(String nodeID) 
+	{
+		for(NodeIdentifier temp : listOnlineNodes) {
+			if(temp.getNodeID().equals(nodeID))
+				return listOnlineNodes.remove(temp);
+		} 
+		return false;
+	}
+	private static void printOnineUsers() 
+	{
+		for(NodeIdentifier temp : listOnlineNodes)
+			System.out.println("[" + temp.getNodeID() + "," + temp.getRegistrationTime() + "]");
+	}
+	
+}

@@ -1,0 +1,27 @@
+package mainPackage;
+
+import db.DBConnector;
+import db.DBCreation;
+import db.MaliciousPatterns;
+import db.NodeIdentifier;
+
+public class Main {
+	public static void main(String[] args) {
+		DBCreation.createAdderDB();
+		
+		NodeIdentifier node1 = new NodeIdentifier("tempnode_1");
+		NodeIdentifier node2 = new NodeIdentifier("tempnode_2");
+		DBConnector.clientDbRegistration(node1);
+		DBConnector.clientDbRegistration(node2);
+		DBConnector.clientDbRegistration(node1);
+		DBConnector.insertMaliciousPattern("192.168.2.5", "IP" );
+		DBConnector.insertMaliciousPattern("facebook", "otinanai" );
+		DBConnector.insertMaliciousPattern("192.168.2.5", "IP" );
+		
+//		DBConnector.maliciousPatternRequestFromDb();
+
+		MaliciousPatterns.printMaliciousPatterns();
+		System.out.println("\nEnd of main()...");
+	}
+
+}

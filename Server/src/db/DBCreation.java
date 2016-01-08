@@ -1,0 +1,194 @@
+package db;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Properties;
+
+public class DBCreation {
+	private static DBCreation instance = null ;
+    private String url; 				
+    private String driver; 		
+    private String userName; 	 
+    private String password; 	
+    private String dbName; 		
+    
+    private DBCreation() {								
+    	fixDbProperties();
+    }
+    
+    public static synchronized DBCreation getInstance() {
+		if(instance == null)
+			instance = new DBCreation();
+		return instance;
+	}
+	
+    //////////////////////////////////////////////
+    /// Returns a connection with mysql //////////
+    public Connection connectWithMysql() {
+    	Connection conn;
+    	try {
+    		Class.forName(driver).newInstance();
+    		conn = DriverManager.getConnection(url, userName, password);
+    	}
+    	catch (Exception e){
+    		System.out.println("***Cannot connect with mysql");
+    		//e.printStackTrace();
+    		conn=null;
+    	}
+    	return conn;
+    }
+    
+    ///////////////////////////////////////////////////////
+    /// Returns a connection with adderDB ///
+    public Connection connect() {
+    	Connection conn;
+    	try {
+    		Class.forName(driver).newInstance();
+    		conn = DriverManager.getConnection(url+dbName, userName, password);
+    	}
+    	catch (Exception e){
+    		//System.out.println("***Cannot connect with database");
+    		e.printStackTrace();
+    		conn=null;
+    	}
+    	return conn;
+    }
+ 
+    public static void createAdderDB() {
+    	DBCreation sql = DBCreation.getInstance();
+        Connection conn;
+    	PreparedStatement st;
+    	conn = sql.connectWithMysql();
+
+    	//////////////////////////////////////////
+    	/// Creating database ////////////////////
+    	System.out.println("Checking adderDB database");
+    	try {
+       		st = conn.prepareStatement("CREATE DATABASE IF NOT EXISTS adderDB");
+    		st.executeUpdate();	
+    	}
+    	catch (SQLException e) {
+    		System.out.println("Error while creating database adderDB");
+    		return;
+    	}
+    	finally {
+    		try { 
+    			conn.close(); 
+    		}
+    		catch (SQLException e) { 
+        		System.out.println("***Cannot close connection with db");
+
+    			e.printStackTrace(); 
+    		}    		
+    	}
+    	/////////////////////////////////////
+    	/// time to create adderDB tables ///
+    	DBCreation.createAdderTables();
+    }
+    
+    public static void createAdderTables() {
+        DBCreation sql = DBCreation.getInstance();
+        Connection conn;
+        PreparedStatement st;
+        conn = sql.connect();
+
+        //////////////////////////////////////////
+        /// Creating Tables ////////////////////
+        try {
+        	
+        	 System.out.println("Checking 'android_clients' table");                                    //// VARCHAR(16) ////////    AUTO_INCREM.
+             st = conn.prepareStatement("CREATE TABLE IF NOT EXISTS android_clients (username VARCHAR(30) NOT NULL PRIMARY KEY, password VARCHAR(30) NOT NULL)");
+             st.executeUpdate();
+             st.clearParameters();
+
+             /****************** insert admin's account into database ******************************/
+             if(!DBConnector.checkMobileExistance("admin","1234")) {
+            	st = conn.prepareStatement("insert into android_clients (username, password) values (?, ?)");
+            	st.setString(1, "admin");
+            	st.setString(2, "1234");
+            	st.executeUpdate();
+            	st.clearParameters();
+             }
+             
+            System.out.println("Checking 'clients' table");                
+            st = conn.prepareStatement("CREATE TABLE IF NOT EXISTS clients (clientID VARCHAR(30) NOT NULL PRIMARY KEY,maliciousPatternTimestamp Timestamp, belongs_to_android VARCHAR(30), FOREIGN KEY(belongs_to_android) REFERENCES android_clients(username))");    //,statisticalReportTimestamp LONG)");
+            st.executeUpdate();
+            st.clearParameters();
+            
+            System.out.println("Checking 'maliciousPatterns' table");                                    //// VARCHAR(16) ////////    AUTO_INCREM.
+            st = conn.prepareStatement("CREATE TABLE IF NOT EXISTS maliciousPatterns (patternID INT NOT NULL AUTO_INCREMENT,maliciousStringPattern VARCHAR(30),maliciousIP VARCHAR(30), time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ,PRIMARY KEY (patternID))");    //// ,mpsmTimestamp LONG,
+            st.executeUpdate();
+            st.clearParameters();
+            
+            System.out.println("Checking 'statistics' table");     
+//            st = conn.prepareStatement("CREATE TABLE IF NOT EXISTS statistics (nodeID VARCHAR(30), interfaceName VARCHAR(20), interfaceIP VARCHAR(20), maliciousPattern VARCHAR(30), frequency INT)");
+            st = conn.prepareStatement("CREATE TABLE IF NOT EXISTS statistics (nodeID VARCHAR(30), interfaceName VARCHAR(20), interfaceIP VARCHAR(20), maliciousPatternID INT, frequency INT, FOREIGN KEY(nodeID) REFERENCES clients(clientID),FOREIGN KEY(maliciousPatternID) REFERENCES maliciousPatterns(patternID))");
+            st.executeUpdate();
+            st.clearParameters();
+
+        }
+        catch (SQLException e) {
+            //System.out.println("Error while creating tables!");
+            e.printStackTrace();
+        }
+        finally {
+            try {
+                conn.close();
+            }
+            catch (SQLException se) {
+                System.out.println("***Cannot close connection with db");
+
+                se.printStackTrace();
+            }
+        }
+
+    }
+    private void fixDbProperties() {
+    	File propertiesFile = new File("dbConfig.properties");
+		if(!propertiesFile.exists()) {
+			try {
+				propertiesFile.createNewFile();
+				FileWriter buffer = new FileWriter("dbConfig.properties");
+		    	this.url = "jdbc:mysql://localhost:3306/";
+				buffer.write("URL=" + this.url + "\n");
+				this.driver = "com.mysql.jdbc.Driver";
+				buffer.write("DRIVER=" + this.driver + "\n");
+				this.userName = "root";
+				buffer.write("USERNAME=" + this.userName + "\n");
+				this.password = "1234";
+				buffer.write("PASSWORD=" + this.password + "\n");
+				this.dbName = "adderDB";
+				buffer.write("DBNAME=" + this.dbName + "\n");
+				buffer.close();
+			
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		}
+		else {
+			Properties properties = new Properties();
+			try {
+				properties.load(new FileInputStream(propertiesFile));
+				this.url = properties.getProperty("URL");
+				this.driver = properties.getProperty("DRIVER");
+				this.userName = properties.getProperty("USERNAME");
+				this.password = properties.getProperty("PASSWORD");
+				this.dbName = properties.getProperty("DBNAME");
+			} catch (FileNotFoundException e1) {
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}	
+		}
+    } 
+}
+
+
+

@@ -1,0 +1,275 @@
+package gui;
+
+import guiDbConnector.MaliciousPattern;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.table.DefaultTableModel;
+
+import db.DBConnector;
+
+public class ActionPanel extends JPanel {
+//	JPanel reportPanel;
+//	JPanel insertPanel;
+//	JPanel removePanel;
+	protected static JComboBox dropDown;
+	protected static JTextArea textArea;
+	protected static DefaultTableModel tableModelAction;
+	protected static JTable table;
+	protected static JTextField insertionField;
+	
+	/// creating only once the Listeners
+	protected ActionListener removeListener = new ActionRemoveListener();
+	protected ActionListener insertionListener = new ActionInsertListener();
+
+
+	
+	public ActionPanel() {
+		initUI();
+	}
+	
+	
+	private void initUI() {
+		add(makeMainPanel());
+	}
+
+
+	/////////////////////////////////////////////////////
+	/// Creating main panel which contains all panels ///
+	/////////////////////////////////////////////////////
+
+	private JPanel makeMainPanel() {
+		JPanel panel = new JPanel();
+		GridBagLayout panelLayout = new GridBagLayout();
+		
+		panel.setLayout(panelLayout);
+
+		GridBagConstraints constraints = new GridBagConstraints();
+
+
+		/// Setting insertion panel layout 
+		constraints.insets = new Insets(70, 5, 10, 20);
+		constraints.weightx = 0.2;
+		constraints.fill = GridBagConstraints.BOTH;
+		constraints.gridx = 0;
+		constraints.gridy = 0;
+		constraints.gridheight = 1;
+		panel.add(makeInsertionPanel(), constraints);
+		
+
+		/// Setting remove panel layout 
+		constraints.insets = new Insets(20, 5, 10, 0);
+		constraints.weightx = 0.8;
+		constraints.fill = GridBagConstraints.BOTH;
+		constraints.anchor = GridBagConstraints.EAST;
+		constraints.gridx = 1;
+		constraints.gridy = 0;
+		constraints.gridheight = 2;
+		panel.add(makeRemovePanel(), constraints);
+		
+		
+		/// Setting report panel layout 
+		constraints.insets = new Insets(20, 5, 10, 10);
+		constraints.fill = GridBagConstraints.HORIZONTAL;
+		constraints.anchor = GridBagConstraints.SOUTH;
+		constraints.gridx = 0;
+	    constraints.gridy = 2;      
+	    constraints.gridwidth = 2;
+		panel.add(makeReportPanel(), constraints);
+		
+		return panel;
+	}
+
+	
+	
+	
+	///////////////////////////////////////////////////
+	/// Creating insertion panel //////////////////////
+	///////////////////////////////////////////////////
+
+	private JPanel makeInsertionPanel() {
+		JPanel panel = new JPanel();
+		GridBagLayout panelLayout = new GridBagLayout();
+		panel.setLayout(panelLayout);
+		GridBagConstraints constraints = new GridBagConstraints();
+		
+		insertionField = new JTextField(15);
+		insertionField.setLayout(new BorderLayout());
+		
+		TitledBorder title = BorderFactory.createTitledBorder(BorderFactory
+				.createEtchedBorder(EtchedBorder.LOWERED),"");
+		panel.setBorder(title);
+		
+		
+		String[] options = { "stringPattern", "IP" };
+		dropDown = new JComboBox(options);
+		dropDown.setSelectedIndex(0);
+
+
+		constraints.insets = new Insets(25, 0, 15, 0);
+		constraints.gridx = 0;
+		constraints.gridy = 0;
+		panel.add(new JLabel("<html><b><font size='4'>Insert new Malicious: "), constraints);
+
+		constraints.insets = new Insets(25, 5, 15, 5);
+		constraints.gridx = 1;
+		constraints.gridy = 0;
+		panel.add(dropDown, constraints);
+		
+		constraints.insets = new Insets(15, 0, 10, 5);
+		constraints.gridx = 0;
+		constraints.gridy = 2;	
+	    constraints.gridwidth = 2;
+		panel.add(insertionField, constraints);
+		
+		constraints.insets = new Insets(15, 0, 10, 5);
+		constraints.gridx = 0;
+		constraints.gridy = 3;
+		constraints.fill = GridBagConstraints.HORIZONTAL;
+	    constraints.gridwidth = 2;
+		panel.add(makeInsertionButton(), constraints);
+
+		return panel;
+	}
+	
+	
+
+	private JPanel makeInsertionButton() {
+		JPanel panel = new JPanel();
+		
+		ImageIcon settingsIcon = new ImageIcon("images/insert.png");
+
+		JButton button = new JButton("Add");
+		button.setToolTipText("type something to insert");
+		button.setIcon(settingsIcon);
+		button.addActionListener(insertionListener);
+
+		panel.add(button);
+		
+		return panel;
+		
+	}
+	
+
+	///////////////////////////////////////////////
+	/// Creating remove panel /////////////////////
+	///////////////////////////////////////////////
+
+	private JPanel makeRemovePanel() {
+		JPanel panel = new JPanel();
+
+		TitledBorder title = BorderFactory.createTitledBorder(BorderFactory
+				.createEtchedBorder(EtchedBorder.LOWERED)," Select pattern to remove: ");
+
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS)); //vertical alignment
+		panel.setBorder(title);
+		panel.add(makeRemoveTable());		
+		panel.add(makeRemoveButton());
+		
+		return panel;
+	}
+
+	
+	private JScrollPane makeRemoveTable() {
+		int i;
+		String[] header = {
+				"<html><b><font size='3'>PatternID</font></b></html>",
+				"<html><b><font size='3'>Pattern</font></b></html>",
+				"<html><b><font size='3'>Date</font></b></html>"};		
+		tableModelAction = new DefaultTableModel(null, header) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+		
+		table = new JTable(tableModelAction);
+		table.setRowSelectionAllowed(true);
+		table.setFillsViewportHeight(true);
+		
+		JScrollPane scrollPane = new JScrollPane(table);
+		/// getting Malicious patterns from db at the time of creation
+		ArrayList <MaliciousPattern> maliciousList = DBConnector.getMaliciousPatternsForGui(); 
+		
+		tableModelAction.setRowCount(0);//reset table to ZERO rows
+		
+		for (i=0; i<maliciousList.size(); i++) {
+			MaliciousPattern mal = maliciousList.get(i);
+			
+			Object[] tableRow = {
+					mal.getMaliciousPatternID(),
+					mal.getMaliciousPattern(),
+					mal.getMaliciousTime()
+					
+				};
+			tableModelAction.addRow(tableRow);
+		}
+
+		scrollPane.setPreferredSize(new Dimension(330, 270));
+		
+		return scrollPane;
+	}
+	
+	private JPanel makeRemoveButton() {
+		JPanel panel = new JPanel();
+		ImageIcon settingsIcon = new ImageIcon("images/remove.png");
+		JButton button = new JButton("Remove");
+		button.setToolTipText("Select a pattern to delete!");
+		button.setIcon(settingsIcon);
+		button.addActionListener(removeListener);
+		panel.add(button);
+
+		return panel;
+	}
+	
+	
+
+	//////////////////////////////////////////////////////////////////////
+	/// Creating report panel ////////////////////////////////////////////
+	/// (Different instance from Statistics report teminal ///////////////
+	/// (REASON: we may want to report something only in Action panel) ///
+	//////////////////////////////////////////////////////////////////////
+
+	public JPanel makeReportPanel() {
+		JPanel panel = new JPanel();		
+		textArea = new JTextArea(5,70);
+		textArea.setEditable(false);
+		textArea.setBorder(BorderFactory.createEtchedBorder());
+		textArea.setAutoscrolls(true);
+		textArea.setText("> Adder program is ready!");
+		JScrollPane scrollPane = new JScrollPane(textArea);
+		textArea.setBackground(Color.BLACK);
+		textArea.setForeground(Color.GREEN);
+		TitledBorder title = BorderFactory.createTitledBorder(BorderFactory
+				.createEtchedBorder(EtchedBorder.LOWERED)," Report Panel ");
+		panel.setBorder(title);		
+		panel.add(scrollPane);
+
+		return panel;
+	}
+		
+	
+}
+
+

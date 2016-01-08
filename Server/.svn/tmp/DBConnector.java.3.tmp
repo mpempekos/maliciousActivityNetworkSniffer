@@ -1,0 +1,660 @@
+package db;
+////
+import java.sql.Connection;
+//import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+//import java.util.List;
+//import java.util.Iterator;
+
+//import com.sun.xml.internal.bind.v2.runtime.reflect.ListIterator;
+
+import java.util.ListIterator;
+
+import nodes.NodeIdentifier;
+import nodes.OnlineNodesMemory;
+import dbObjects.ClientsEntry;
+import dbObjects.MaliciousPatternsEntry;
+<<<<<<< .mine
+import dbObjects.StatisticsEntry;
+import exchangeableObjects.MaliciousPatterns;
+=======
+import dbObjects.StatisticsEntry;
+import exchangableObjects.AvailableNodes;
+import exchangeableObjects.MaliciousPatterns;
+>>>>>>> .r91
+
+
+public class DBConnector {
+
+	///////////////////////////////////////////
+	/// Registers into database a pc/laptop ///
+	
+	public static boolean clientDbRegistration(NodeIdentifier node) {
+		DBCreation sql = DBCreation.getInstance();
+		boolean registered = false;
+		ResultSet res = null;
+		Connection conn = sql.connect();
+		//String type = "PC/Laptop"; // for now, only PC/Laptops...
+		try {
+			
+			String query = "select clientID from clients where clientID = ?";
+			PreparedStatement st = conn.prepareStatement(query);
+			st.setString(1, node.getNodeID());
+			res = st.executeQuery();
+
+<<<<<<< .mine
+        // check if this client is already registered!
+        if(res.next()) {
+        	return registered;
+        }
+        	st.clearParameters();
+        	String query_2 = " insert into clients (clientID, type, maliciousPatternTimestamp)" + " values (?, ?, ?);";
+              st = conn.prepareStatement(query_2);
+              st.setString (1, node.getNodeID());
+              st.setString (2, type);
+              st.setTimestamp(3, node.getRegistrationTime());
+              st.executeUpdate();
+              registered = true;
+        }
+        catch (SQLException e) {
+    		System.out.println("Can't insert into clients table!");
+    	} finally {
+    		try {
+=======
+			// check if this client is already registered!
+			if (res.next()) {
+				System.out.println("Client already registered");
+				return registered;
+			}
+			st.clearParameters();
+			String query_2 = " insert into clients (clientID, maliciousPatternTimestamp)"
+					+ " values (?, ?);";
+			st = conn.prepareStatement(query_2);
+			st.setString(1, node.getNodeID());
+			st.setTimestamp(2, node.getRegistrationTime());
+			st.executeUpdate();
+			registered = true;
+		} catch (SQLException e) {
+			System.out.println("Can't insert into clients table!");
+		} finally {
+			try {
+>>>>>>> .r91
+				conn.close();
+				return registered;
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return registered;
+	}
+	
+	
+	
+	public static void insertMaliciousPattern(String newMaliciousPattern,String type) {
+		DBCreation sql = DBCreation.getInstance();
+        Connection conn = sql.connect();
+        PreparedStatement stmt = null;
+        ResultSet res;
+        PreparedStatement st;
+        String query;
+        try {
+            /********** if the new maliciousPattern is maliciousIP ********/
+            if (type.equalsIgnoreCase("IP")) {
+            	query = "select maliciousIP from maliciousPatterns where maliciousIP = ?";
+                st = conn.prepareStatement(query);
+                st.setString(1,newMaliciousPattern);		
+                res = st.executeQuery();
+        // check if this maliciousPattern is already registered!
+                if(res.next()) {
+                	gui.ReportTerminalOperations.addReport("> Pattern: '"+newMaliciousPattern+"' already exists!");
+                	//System.out.println("Pattern already registered");
+                	return;
+                }
+                st.clearParameters();
+            	stmt = conn.prepareStatement("INSERT into maliciousPatterns(maliciousIP) VALUES (?)");
+            	stmt.setString(1, newMaliciousPattern);
+            	stmt.executeUpdate();
+            	gui.ReportTerminalOperations.addReport("> INSERT INTO maliciousPatterns (maliciousIP) VALUES ('"+newMaliciousPattern+"')");
+            }
+            /********** if the new maliciousPattern is maliciousStringPattern ********/
+            else {
+            	query = "select maliciousStringPattern from maliciousPatterns where maliciousStringPattern = ?";
+                st = conn.prepareStatement(query);
+                st.setString(1,newMaliciousPattern);		
+                res = st.executeQuery();
+        // check if this maliciousPattern is already registered!
+                if(res.next()) {
+                	gui.ReportTerminalOperations.addReport("> Pattern: '"+newMaliciousPattern+"' already exists!");
+                	//System.out.println("Pattern already registered");
+                	return;
+                }
+                st.clearParameters();
+            	stmt = conn.prepareStatement("INSERT into maliciousPatterns(maliciousStringPattern) VALUES (?)");
+                    	stmt.setString(1, newMaliciousPattern);
+                    	stmt.executeUpdate();  
+        	    		gui.ReportTerminalOperations.addReport("> INSERT INTO maliciousPatterns (maliciousStringPattern) VALUES ('"+newMaliciousPattern+"')");    			
+
+            }
+        }
+            catch (SQLException e) {
+        		System.out.println("Can't insert into maliciousPatterns table!");
+            	//e.printStackTrace();
+        	} finally {
+        		try {
+    				conn.close();
+        		}
+        		catch (SQLException e) {
+        			e.printStackTrace();
+        		}
+        	}
+    	}
+	
+	
+	public static void deleteMaliciousPattern(int patternID) {
+    	DBCreation sql = DBCreation.getInstance();
+        Connection conn;
+    	PreparedStatement st;
+    	conn = sql.connect();
+    	try {
+
+    		st = conn.prepareStatement("DELETE FROM statistics WHERE maliciousPatternID=?");
+    		st.setInt(1, patternID);
+            st.executeUpdate();
+            st.clearParameters();
+
+    		st = conn.prepareStatement("DELETE FROM maliciousPatterns WHERE patternID=?");
+    		st.setInt(1, patternID);
+            st.executeUpdate();
+            
+            
+    		gui.ReportTerminalOperations.addReport("> DELETE FROM maliciousPatterns WHERE patternID='"+patternID+"'");
+
+    	
+    	
+    	}
+    	catch (SQLException e) {
+			e.printStackTrace();
+    	} finally {
+    		try {
+				conn.close();
+    		} catch (SQLException e) {
+				e.printStackTrace();
+			}
+    	}
+	}
+	
+	/////////////////////////////////////////////
+	/// Gets a list of all malicious patterns ///
+	public static ArrayList<MaliciousPatternsEntry> getMaliciousPatternsForGui() {
+
+		ArrayList<MaliciousPatternsEntry> maliciousList = new ArrayList<MaliciousPatternsEntry>();
+		MaliciousPatternsEntry mal = new MaliciousPatternsEntry();
+		DBCreation sql = DBCreation.getInstance();	//new DBCreation();
+        Connection conn;
+        ResultSet res=null;
+    	PreparedStatement st;
+    	conn = sql.connect();
+    	try {
+    		st = conn.prepareStatement("SELECT * FROM maliciousPatterns");
+            res = st.executeQuery();
+            while (res.next()) {
+            	mal.setMaliciousPatternID(res.getInt("patternID"));
+            	if (res.getString("maliciousIP") != null)
+            		mal.setMaliciousPattern(res.getString("maliciousIP"));
+            	else 
+            		mal.setMaliciousPattern(res.getString("maliciousStringPattern"));
+            	mal.setMaliciousTime(res.getTimestamp("time").toString());
+
+            	maliciousList.add(mal);
+            	mal = new MaliciousPatternsEntry();
+            }
+            
+    
+    	}
+    	catch (SQLException e) {
+    		e.printStackTrace();
+    		//System.out.println("Can't get malicious patterns from db");
+    	} finally {
+    		try {
+				conn.close();
+				return maliciousList;
+    		} catch (SQLException e) {
+				e.printStackTrace();
+    		}    	
+    	}
+		return maliciousList;		
+	}
+	
+	public static MaliciousPatterns getAllMaliciousPatternsFromDb() 
+	{
+		MaliciousPatterns maliciousPatterns = new MaliciousPatterns();
+		DBCreation sql = DBCreation.getInstance();	//new DBCreation();
+        Connection conn;
+        ResultSet res=null;
+    	PreparedStatement st;
+    	conn = sql.connect();
+    	try {
+    		st = conn.prepareStatement("SELECT * FROM maliciousPatterns");
+            res = st.executeQuery();
+            while (res.next()) {
+            	if (res.getString("maliciousIP") != null)
+            		maliciousPatterns.getMaliciousIPsList().add(res.getString("maliciousIP"));
+            	else 
+            		maliciousPatterns.getMaliciousStringPatternsList().add(res.getString("maliciousStringPattern"));
+            }
+    	}
+    	catch (SQLException e) {
+    		e.printStackTrace();
+    	} finally {
+    		try {
+				conn.close();
+				return maliciousPatterns;
+    		} catch (SQLException e) {
+				e.printStackTrace();
+    		}    	
+    	}
+		return maliciousPatterns;		
+	}
+	
+	////////////////////////////////////////////////////////////////////////
+	/// Insert to db an S-MPSM entry. If entry exists, updates frequency ///
+	@SuppressWarnings("resource")
+	public static void updateStatistics(StatisticsEntry entry,String uid) {
+		String nodeID = uid;
+		String interfaceName = entry.getInterfaceName();
+		String interfaceIP = entry.getInterfaceIp();
+		String maliciousPattern = entry.getMaliciousPattern();
+		int frequency = entry.getFrequency();
+    	DBCreation sql = DBCreation.getInstance();		//new DBCreation();
+        Connection conn;
+        ResultSet res=null;
+    	PreparedStatement st;
+    	conn = sql.connect();
+    	try {
+//    		st = conn.prepareStatement("SELECT * FROM clients c, statistics s, maliciousPatterns m WHERE nodeID=? AND interfaceIP=? AND s.maliciousPatternID=m.patternID AND (m.maliciousStringPattern=? OR m.maliciousIP=?)");
+    		st = conn.prepareStatement("SELECT nodeID,interfaceName,interfaceIP,maliciousPatternID FROM statistics WHERE nodeID=? AND interfaceName=? AND interfaceIP=? AND maliciousPatternID=(select patternID from maliciousPatterns WHERE maliciousStringPattern=? OR maliciousIP=?)");
+    		st.setString(1, nodeID);
+    		st.setString(2, interfaceName);
+    		st.setString(3, interfaceIP);
+    		st.setString(4, maliciousPattern);
+    		st.setString(5, maliciousPattern);
+            res = st.executeQuery();
+
+            
+            
+            
+            ///////////////////////////////////////////////////
+            /// If the trinity already exist in an entry	///
+            /// (nodeID - interfaceIP - maliciousPattern) 	///
+            /// Then we just update the frequency			///
+            if(res.next()) {            	
+            	st.clearParameters();
+//            	freq = res.getInt("frequency");
+//            	st = conn.prepareStatement("UPDATE statistics SET frequency=frequency+? WHERE nodeID=? AND interfaceIP=? AND maliciousPattern=?");
+            	st = conn.prepareStatement("UPDATE statistics SET frequency=frequency+? WHERE nodeID=? AND interfaceIP=? AND maliciousPatternID=(select patternID from maliciousPatterns WHERE maliciousStringPattern=? OR maliciousIP=?)");
+            	st.setInt(1, frequency);
+	        	st.setString(2, nodeID);
+	        	st.setString(3, interfaceIP);
+	        	st.setString(4, maliciousPattern);
+	        	st.setString(5, maliciousPattern);
+	    		st.executeUpdate();
+	    		conn.close();
+            }
+            else {
+            	st.clearParameters();
+	            st = conn.prepareStatement("INSERT INTO statistics (nodeID, interfaceName, interfaceIP, maliciousPatternID, frequency) VALUES ( ?, ?, ?, (select patternID from maliciousPatterns where  maliciousStringPattern=? OR maliciousIP=?), ?)");
+//	            st = conn.prepareStatement("INSERT INTO statistics (nodeID, interfaceName, interfaceIP, maliciousPatternID, frequency) VALUES ( (select clientID from clients where clientID=?), ?, ?, ?, ?)");
+	           	st.setString(1, nodeID);
+	           	st.setString(2, interfaceName);
+	           	st.setString(3, interfaceIP);
+	           	st.setString(4, maliciousPattern);
+	           	st.setString(5, maliciousPattern);
+	           	st.setInt(6, frequency);
+	           	st.executeUpdate();
+	           	st.clearParameters();
+            }
+    	}
+    	catch (SQLException e) {
+    		System.out.println("Can't insert into statistics table");
+    	} finally {
+    		try {
+				conn.close();
+    		} catch (SQLException e) {
+				e.printStackTrace();
+			}
+    	}
+	}
+	
+	
+	
+	
+
+	
+	public static ArrayList<ArrayList<String>> getStatistics(String category, String filter, boolean toReport) {
+		ArrayList<ArrayList<String>> statistics = new ArrayList<ArrayList<String>>();
+		ArrayList<String> statReport = new ArrayList<String>();
+    	DBCreation sql = DBCreation.getInstance();
+        Connection conn;
+        ResultSet res=null;
+        ResultSet res2=null;
+    	PreparedStatement st;
+    	conn = sql.connect();
+    	String mal = new String();
+    	int malID=0;
+    	try {
+    		    		
+    		if ((category.equalsIgnoreCase("(all)")) || (filter.equalsIgnoreCase("")) ){
+    			st = conn.prepareStatement("SELECT * FROM statistics ");
+	            res = st.executeQuery();
+	            st.clearParameters();
+	            
+	            if (toReport)
+	            	gui.ReportTerminalOperations.addReport("> SELECT * FROM statistics");
+
+    		} else if (category.equalsIgnoreCase("nodeID")) {
+    			st = conn.prepareStatement("SELECT * FROM statistics WHERE nodeID=?");
+    	    	st.setString(1, filter);
+	            res = st.executeQuery();
+	            if (toReport)
+	            	gui.ReportTerminalOperations.addReport("> SELECT * FROM statistics WHERE nodeID='"+filter+"'");
+
+    		} else if (category.equalsIgnoreCase("maliciousPattern")){
+    			st = conn.prepareStatement("SELECT * FROM statistics WHERE maliciousPatternID=(select patternID from maliciousPatterns WHERE maliciousStringPattern=? OR maliciousIP=?)");
+    	    	st.setString(1, filter);
+    	    	st.setString(2, filter);
+	            res = st.executeQuery();
+	            if (toReport)
+	            	gui.ReportTerminalOperations.addReport("> SELECT * FROM statistics WHERE maliciousPatternID=(select patternID from maliciousPatterns WHERE maliciousStringPattern='"+filter+"' OR maliciousIP='"+filter+"')");
+//            	gui.ReportTerminalOperations.addReport("> SELECT * FROM statistics WHERE maliciousPattern='"+filter+"'");
+	                			
+    		} else if (category.equalsIgnoreCase("interfaceIP")){
+    			st = conn.prepareStatement("SELECT * FROM statistics WHERE interfaceIP=?");
+    	    	st.setString(1, filter);
+	            res = st.executeQuery();
+	            if (toReport)
+	            	gui.ReportTerminalOperations.addReport("> SELECT * FROM statistics WHERE interfaceIP='"+filter+"'");
+    			
+    		} else if (category.equalsIgnoreCase("interfaceName")){
+    			st = conn.prepareStatement("SELECT * FROM statistics WHERE interfaceName=?");
+    	    	st.setString(1, filter);
+	            res = st.executeQuery();
+	            if (toReport)
+	            	gui.ReportTerminalOperations.addReport("> SELECT * FROM statistics WHERE interfaceName='"+filter+"'");
+    		}
+    		
+    		/// we'll only show statistics of registered users
+    		ArrayList<String> registeredNodes = OnlineNodesMemory.getRegisteredNodes();
+    		
+    		
+    		
+    		if (res != null)
+	    		while (res.next()) {
+	    			// if current statistical report belongs 
+	    			// to unregistered node we ignore it
+	    			if (!registeredNodes.contains(res.getString("nodeID")))
+	    				continue;
+	            	statReport.add(res.getString("nodeID"));
+	            	statReport.add(res.getString("interfaceName"));
+	            	statReport.add(res.getString("interfaceIP"));
+
+	            	
+	            	malID = res.getInt("maliciousPatternID");
+	       			st = conn.prepareStatement("SELECT maliciousStringPattern,maliciousIP FROM maliciousPatterns WHERE patternID=?");
+	    	    	st.setInt(1, malID);
+		            res2 = st.executeQuery();
+		            
+		            res2.next();
+			        if (res2.getString("maliciousStringPattern") == null){
+		            	mal=res2.getString("maliciousIP");
+			        }
+		            if (res2.getString("maliciousIP") == null) {
+		            	mal=res2.getString("maliciousStringPattern");
+		            }
+			        st.clearParameters();
+	            		            	
+	            	statReport.add(mal);
+	            	statReport.add((res.getString("frequency")));
+	            	statistics.add(statReport);
+	            	statReport = new ArrayList<String>();             	
+	            }
+    	} catch (SQLException e) {
+    		System.out.println("Error at getStatistics()");
+    	}	
+		return statistics;
+	}
+
+
+	
+	
+	
+
+	public static ClientsEntry getNodeInfo (String nodeID) {
+
+		DBCreation sql = DBCreation.getInstance();
+        Connection conn;
+        ResultSet res=null;
+    	PreparedStatement st;
+    	conn = sql.connect();
+    	
+    	ClientsEntry node = new ClientsEntry();
+    	node.setNodeID(nodeID);
+
+    	try {
+    		st = conn.prepareStatement("SELECT * FROM statistics WHERE nodeID=?");
+	    	st.setString(1, nodeID);
+    		res = st.executeQuery();
+
+    		int numOfReports=0;
+            while (res.next()) {
+            	numOfReports = numOfReports+res.getInt("frequency");
+            }
+            node.setNumOfMalicious(numOfReports);
+
+            
+            st.clearParameters();
+    		st = conn.prepareStatement("SELECT * FROM clients WHERE clientID=?");
+    		st.setString(1, nodeID);
+    		res = st.executeQuery();
+    		gui.ReportTerminalOperations.addReport("> SELECT * FROM clients WHERE clientID= "+nodeID+"'");
+            if (res.next()) {
+//            	System.out.println("mpike...");
+            	node.setLastReport(res.getString("maliciousPatternTimestamp"));
+            	node.setType(res.getString("type"));
+//            	System.out.println("---> "+iii);
+//            	node.setType(res.getBoolean("type"));
+            }
+            else {
+        		gui.ReportTerminalOperations.addReport("> WARNING! Node '"+nodeID+"' is not registered!");
+            }
+    		
+    		
+    	}
+    	catch (SQLException e) {
+    		e.printStackTrace();
+    		//System.out.println("Can't get malicious patterns from db");
+    	} finally {
+    		try {
+				conn.close();
+				return node;
+    		} catch (SQLException e) {
+				e.printStackTrace();
+    		}    	
+    	}
+		return node;		
+	}
+	
+<<<<<<< .mine
+=======
+	
+	/********************* new methods U P D A T E D  ********************************/
+
+	public static boolean register(String username, String password, AvailableNodes nodes) {
+		DBCreation sql = DBCreation.getInstance();
+		Connection conn = sql.connect();
+		boolean registered = false;
+		ResultSet res = null;
+
+		try {
+			
+			/******* check if this username is already used...  *****/
+			
+			String query = "select username from android_clients where username = ?";
+			PreparedStatement st = conn.prepareStatement(query);
+			st.setString(1, username);
+			res = st.executeQuery();
+
+			if (res.next()) {
+				System.out.println("This username is  already registered");
+				return registered;
+			}
+			st.clearParameters();
+			
+			String query_2 = " insert into android_clients (username, passsword)"
+					+ " values (?, ?);";
+			st = conn.prepareStatement(query_2);
+			st.setString(1, username);
+			st.setString(2, password);
+			st.executeUpdate();
+			st.clearParameters();
+			registered = true;
+			
+			/*********** fill the clients table ****************/
+			
+			ListIterator<String> iteratorList = nodes.getNodes().listIterator();
+			while(iteratorList.hasNext()) {
+				st = conn.prepareStatement("UPDATE clients SET belongs_to_android=? WHERE clientID=? ");
+            	st.setString(1, username);
+	        	st.setString(2, iteratorList.next());
+	        	st.executeUpdate();
+	           	st.clearParameters();
+				
+			}
+		}
+
+		catch (SQLException e) {
+			System.out.println("Can't insert into android_clients table!");
+		} finally {
+			try {
+				conn.close();
+				return registered;
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return registered;
+	}
+
+	/******** unregister ***********/
+
+	/*******
+	 * mitsos says below method not needed...i disagree...to be
+	 * discussed...doesn't really matter
+	 ****/
+
+	public static boolean unregister(String nodeID) {
+		DBCreation sql = DBCreation.getInstance();
+		Connection conn = sql.connect();
+		boolean unregistered = false;
+
+		try {
+			String query = "delete from clients where  clientID = ?";
+			PreparedStatement st = conn.prepareStatement(query);
+			st.setString(1, nodeID);
+			st.executeUpdate();
+			unregistered = true;
+
+		} catch (SQLException e) {
+			// e.printStackTrace();
+			System.out.println("Cannot unregister client");
+		} finally {
+			try {
+				conn.close();
+				return unregistered;
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return unregistered;
+	}
+	
+	
+	/************************** need a method for retrieve statistics *****************************************/
+	
+	/******* method getStatistics has already been implemented...if anotherone is needed, let the sql_guru know... ******/
+	
+	
+	
+	
+	/*********** login method returns 0 if login failed, 1 if login is successful and 2 if the login is from admin *********/
+	
+	
+>>>>>>> .r91
+	public static int login(String username, String password) {
+		DBCreation sql = DBCreation.getInstance();
+		Connection conn = sql.connect();
+		int returnval = 0;
+		ResultSet res;
+		
+		try {
+			String query = "select username from android_clients where  username = ?";
+			PreparedStatement st = conn.prepareStatement(query);
+			st.setString(1, username);
+			res = st.executeQuery();
+			st.clearParameters();
+			
+			/******* username doesn't exist in database	*********/
+			
+			if (!res.next()){
+				return returnval;
+			}
+			
+			/******* username  exists in database	*********/
+			
+			else {
+				
+				if (username.equals("admin")) {					/// admin tries to login
+					if (!password.equals("1234")) {
+						System.out.println("Who are you kidding? You are not admin!");
+						return returnval;
+					}
+					else {
+						returnval = 2;
+						return returnval;
+					}
+				}
+				
+				else {											/// client tries to login
+					query = "select password from android_clients where username = ?";
+					st = conn.prepareStatement(query);
+					st.setString(1, username);
+					res = st.executeQuery();
+					
+					if (!res.next())					/// idiot client gave wrong password
+						return returnval;
+					
+					else {
+						returnval = 1;
+						return returnval;
+					}
+				}
+			}
+
+		} catch (SQLException e) {
+			// e.printStackTrace();
+			System.out.println("Trying to login failed");
+		} finally {
+			try {
+				conn.close();
+				return returnval;
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return returnval;
+	}
+	
+}

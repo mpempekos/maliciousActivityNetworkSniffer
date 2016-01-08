@@ -1,0 +1,39 @@
+package awesomeapp;
+import org.ksoap2.SoapEnvelope;
+import org.ksoap2.serialization.PropertyInfo;
+import org.ksoap2.serialization.SoapObject;
+import org.ksoap2.serialization.SoapSerializationEnvelope;
+import org.ksoap2.transport.HttpTransportSE;
+
+import android.util.Log;
+
+public class WebServiceConnector {
+	public static boolean loginCall() {
+		final String SOAP_ACTION = "";
+		final String METHOD_NAME = "register";
+		final String NAMESPACE = "http://server/";
+		final String URL = "http://192.168.1.4:9999/Adder";
+		SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
+		PropertyInfo property = new PropertyInfo();
+		property.setName("arg0");
+		property.setType(String.class);
+		property.setValue("098098098098");
+		request.addProperty(property);
+		SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
+        envelope.setOutputSoapObject(request);
+        System.out.println("HERE");
+        HttpTransportSE HttpTransport = new HttpTransportSE(URL);
+        try {
+        	HttpTransport.call(SOAP_ACTION, envelope);
+            SoapObject response = (SoapObject)envelope.bodyIn;
+            boolean result =  Boolean.parseBoolean(response.getProperty(0).toString());
+            System.out.println(response.getProperty(0).toString());
+            //Log.d("result",response.getProperty(0).toString());
+            return result;
+        } catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+		return false;
+	}
+}

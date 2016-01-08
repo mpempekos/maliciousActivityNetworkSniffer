@@ -1,0 +1,25 @@
+package exchangableObjects;
+import java.util.ArrayList;
+import java.util.List;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import dbObjects.StatisticsEntry;
+
+@XmlAccessorType(XmlAccessType.FIELD)
+public class StatisticalReports {
+	@XmlElement
+	private List<StatisticsEntry> statisticalReportList ;
+	public StatisticalReports() {
+		statisticalReportList = new ArrayList<StatisticsEntry>();
+	}
+	public List<StatisticsEntry> getStatisticalReportEntries() 
+	{
+		return statisticalReportList;
+	}
+	public void setStatisticalReportEntries(List<StatisticsEntry> statisticalReportEntries) 
+	{
+		this.statisticalReportList = statisticalReportEntries;
+	}
+	
+}

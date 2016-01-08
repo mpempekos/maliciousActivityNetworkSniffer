@@ -1,0 +1,149 @@
+package adminTabs;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.example.awesomeapp.R;
+
+import android.view.*;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+import android.app.Dialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.Spinner;
+import android.widget.TextView;
+
+public class AddPatternActivity extends Activity implements android.view.View.OnClickListener {
+	
+	private Spinner spinner;
+	final Context context = this;
+	//
+
+	protected void onCreate(Bundle savedInstanceState) {
+	      super.onCreate(savedInstanceState);
+	      setContentView(R.layout.add_pattern_activity);
+	      spinner = (Spinner) findViewById(R.id.spinner1);
+	      addOptionsOnSpinner();
+	   }
+	
+	public void addOptionsOnSpinner() {
+		 
+		List<String> list = new ArrayList<String>();
+		list.add("select type");
+		list.add("maliciousIP");
+		list.add("maliciousStringPattern");
+		ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
+			android.R.layout.simple_spinner_item, list) {
+			
+			    @Override
+			    public View getDropDownView(int position, View convertView, ViewGroup parent)
+			    {
+			        View v = null;
+
+			        // first entry, gets hidden
+			        if (position == 0) {
+			            TextView tv = new TextView(getContext());
+			            tv.setHeight(0);
+			            tv.setVisibility(View.GONE);
+			            v = tv;
+			        }
+			        else {
+			            // Pass convertView as null to prevent reuse of special case views
+			            v = super.getDropDownView(position, null, parent);
+			        }
+
+			        // Hide scroll bar because it appears sometimes unnecessarily, this does not prevent scrolling 
+			        parent.setVerticalScrollBarEnabled(false);
+			        return v;
+			    }
+			};
+
+		dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		spinner.setAdapter(dataAdapter);
+	  }
+	
+	@SuppressWarnings("deprecation")
+	@Override
+	public void onClick(View v) {
+		// TODO Auto-generated method stub
+		
+		switch (v.getId()) {
+   		case R.id.button1:	// insert
+   			
+   			AlertDialog.Builder builder1 = new AlertDialog.Builder(AddPatternActivity.this);
+            builder1.setTitle("Info");
+            builder1.setMessage("Userid : 456345634563"+"\n"+"interface : eth0"+"\n"+"pattern : \"facebook\" 50 times");
+            // builder1.setIcon(R.drawable.ic_launcher);
+            builder1.setNeutralButton("Back", new DialogInterface.OnClickListener()
+            {
+                @Override
+                public void onClick(DialogInterface dialog, int which)
+                {
+                    dialog.cancel();
+                }
+            });
+
+            builder1.show();
+}
+   			
+   		
+   			
+   			// check if both fields are ok, if not alert!
+   			
+   			//  calls web service's insertMaliciousPattern...()
+   			
+   		// custom dialog
+   			
+   	/*////		AlertDialog.Builder builder1 = new AlertDialog.Builder(context);
+            builder1.setMessage("Write your message here.");
+            builder1.setCancelable(true);
+            builder1.setNegativeButton("Yes",
+                    new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    dialog.cancel();
+                }
+            });
+            builder1.setPositiveButton("No",
+                    new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    dialog.cancel();
+                }
+            });
+
+            AlertDialog alert11 = builder1.create();
+            alert11.show();  ///// */
+   			
+   			
+   			
+   			
+   				/*	final Dialog dialog = new Dialog(context);
+   					dialog.setContentView(R.layout.custom_dialog);
+   					dialog.setTitle("Title...");
+   					dialog.show();
+   		 
+   					// set the custom dialog components - text, image and button
+   					TextView text = (TextView) dialog.findViewById(R.id.text);
+   					text.setText("Android custom dialog example!");
+   					ImageView image = (ImageView) dialog.findViewById(R.id.image);
+   					image.setImageResource(R.drawable.ic_launcher);
+   		 
+   					ButtonOnClick dialogButton = (ButtonOnClick) dialog.findViewById(R.id.dialogButtonOK);
+   					// if button is clicked, close the	 custom dialog
+   					//dialogButton.onC
+   						
+   						//public void onClick(View v) {
+   						//	dialog.dismiss();
+   						//}
+   					//});
+   		 
+   					dialog.show();   */
+		
+		}
+	}

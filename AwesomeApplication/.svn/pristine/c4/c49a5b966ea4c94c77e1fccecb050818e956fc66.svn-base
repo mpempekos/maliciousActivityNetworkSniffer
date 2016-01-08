@@ -1,0 +1,43 @@
+package adminTabs;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.example.awesomeapp.R;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
+
+public class AddPatternActivity extends Activity implements android.view.View.OnClickListener {
+	
+	private Spinner spinner;
+
+	protected void onCreate(Bundle savedInstanceState) {
+	      super.onCreate(savedInstanceState);
+	      setContentView(R.layout.add_pattern_activity);
+	      spinner = (Spinner) findViewById(R.id.spinner1);
+	      addOptionsOnSpinner();
+	   }
+	
+	public void addOptionsOnSpinner() {
+		 
+		List<String> list = new ArrayList<String>();
+		list.add("maliciousIP");
+		list.add("maliciousStringPattern");
+		ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
+			android.R.layout.simple_spinner_item, list);
+		dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		spinner.setAdapter(dataAdapter);
+	  }
+	
+	@Override
+	public void onClick(View arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+}

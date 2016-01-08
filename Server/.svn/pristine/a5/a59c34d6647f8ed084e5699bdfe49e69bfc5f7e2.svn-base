@@ -1,0 +1,17 @@
+package main;
+import gui.GUI;
+import server.Publish;
+import db.DBCreation;
+
+public class Main {
+	public static void main(String[] args) 
+	{
+		System.out.println("Starting main()...\n");
+		DBCreation.createAdderDB();
+		Publish.publishAdder();
+		GUI window = new GUI();
+		Thread guiThread = new Thread(window);
+		guiThread.start();
+		System.out.println("\nEnding main()...");
+	}
+}

@@ -1,0 +1,114 @@
+package main;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+import memories.SharedMemoriesManagerThread;
+import networking.InterfacesObserverThread;
+import connectors.TerminalIdentifierThread;
+import connectors.UpdatingThread;
+
+public class MainThread {
+	private static final Lock memoriesReadyLock = new ReentrantLock();
+	private static final Condition memoriesNotReady =  memoriesReadyLock.newCondition();
+	private static volatile boolean memoriesReady = false ;
+	private static final Lock mpsmFilledLock = new ReentrantLock();
+	private static final Condition mpsmNotEmpty =  mpsmFilledLock.newCondition();
+	private static volatile boolean mpsmFilled = false ;
+	/******************************************/
+	/******** THINK IF IS CORRECT *************/
+	private static String UID = null ;
+	/******************************************/
+	/******************************************/
+	public static void main(String[] args) throws InterruptedException
+	{
+		/*This list keeps references to all alive threads (supposedly alive threads) in order to give to Closing Thread
+		**which is called to "clean" before to application exits with SIGINT from terminal.*/
+		List<Thread> threadIDsList = new ArrayList<Thread>();
+		System.out.println("Main thread (id: "+ Thread.currentThread().getId() +") : waiting while Identifier thread adding this terminal device to \"adder\" and \"die\" ");	
+
+		//create thread identifying pc/laptop device and send mac or something to "adder"
+		TerminalIdentifierThread idThread = new TerminalIdentifierThread();
+		idThread.start();
+		idThread.join();
+		
+		System.out.println("\nMain thread : waiting Manager/Connector thread to create shared memories");
+		
+		//create first thread for MPSM,S-MPSM
+		SharedMemoriesManagerThread memManagerThread = new SharedMemoriesManagerThread();
+		memManagerThread.start();
+		threadIDsList.add(memManagerThread);
+		
+		//Main thread waits for memManagerThread to create shared memories.(memoriesReady == true)
+		memoriesReadyLock.lock();
+		try {
+			while(!memoriesReady)
+				memoriesNotReady.await();
+			memoriesNotReady.signal();
+		} finally {
+			memoriesReadyLock.unlock();
+		}		
+		System.out.println("Main thread : application starting up.");
+
+		//create thread for getting updates from "adder"
+		UpdatingThread updatingThread;
+		if(args.length == 0) 
+			updatingThread = new UpdatingThread();
+		else 
+			updatingThread = new UpdatingThread(args[0]);
+		updatingThread.start();	
+		threadIDsList.add(updatingThread);
+		
+		//InterfacesObserverThread and InterfaseServerThread should wait to be sure
+		//MPSM is filled with entries...
+		System.out.println("Main thread : waiting updating thread to fill MPSM with entries.");
+		mpsmFilledLock.lock();
+		try {
+			while(!mpsmFilled)
+				mpsmNotEmpty.await();
+			System.out.println("Main Thread : Ready creating rest threads." + memoriesReady);
+			mpsmNotEmpty.signal();
+		} finally {
+			mpsmFilledLock.unlock();
+		}		
+		//create thread for identifying and observing network interfaces
+		InterfacesObserverThread observerThread = new InterfacesObserverThread();
+		observerThread.start();		
+		threadIDsList.add(observerThread);
+		
+		Runtime.getRuntime().addShutdownHook(new ClosureThread(threadIDsList));
+	}
+	public static String getUID() {
+		return UID;
+	}
+	public static void setUID(String uID) {
+		UID = uID;
+	}
+	public static Lock getMemoriesLock() {
+		return memoriesReadyLock;
+	}
+	public static Lock getMpsmFilledLock() {
+		return mpsmFilledLock;
+	}
+	public static boolean isMemoriesReady()	{
+		return memoriesReady;
+	}
+	public static void setMemoriesReady(boolean memoriesReady) {
+		MainThread.memoriesReady = memoriesReady;
+	}
+	public static boolean isMpsmFilled() {
+		return mpsmFilled;
+	}
+	public static void setMpsmFilled(boolean mpsmFilled) {
+		MainThread.mpsmFilled = mpsmFilled;
+	}
+	public static Condition getMemoriesNotReady() {
+		return memoriesNotReady;
+	}
+	public static Condition getMpsmNotEmpty() {
+		return mpsmNotEmpty;
+	}
+}
+

@@ -1,0 +1,19 @@
+Malicious Ips
+125.232.0.5
+142.21.8.21
+255.245.235.0
+222.222.222.222
+8.8.8.8
+8.8.8.7
+8.8.8.6
+8.8.8.5
+127.0.0.1
+199.223.212.93
+
+
+Malicious string patterns
+http://*
+[h-k]ello
+name
+google
+facebook
